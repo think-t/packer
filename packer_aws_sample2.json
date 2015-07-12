@@ -1,0 +1,49 @@
+{
+  "variables": {
+    "aws_access_key" : "{{env `AWS_ACCESS_KEY`}}",
+    "aws_secret_key" : "{{env `AWS_SECRET_KEY`}}"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "ap-northeast-1",
+      "source_ami": "ami-13614b12",
+      "instance_type": "m3.medium",
+      "ssh_username": "root",
+      "ssh_timeout": "5m",
+      "ami_name": "packer_aws_sample-{{timestamp}}"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "yum -y update",
+        "rm -f /root/.ssh/authorized_keys"
+      ]
+    },
+    {
+      "type": "chef-solo",
+      "cookbook_paths": ["./site-cookbooks/"],
+      "run_list": [
+      "selinux::disabled",
+      "ntp::default"
+      ],
+      "json": {},
+      "prevent_sudo": true,
+      "skip_install": false
+    },
+    {
+      "type": "file",
+      "source": "tests",
+      "destination": "/tmp"
+    },
+    {
+      "type": "shell",
+      "script": "scripts/serverspec.sh"
+    }
+  ]
+}

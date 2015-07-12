@@ -1,0 +1,28 @@
+{
+  "variables": {
+    "aws_access_key" : "{{env `AWS_ACCESS_KEY`}}",
+    "aws_secret_key" : "{{env `AWS_SECRET_KEY`}}"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "ap-northeast-1",
+      "source_ami": "ami-13614b12",
+      "instance_type": "m3.medium",
+      "ssh_username": "root",
+      "ssh_timeout": "5m",
+      "ami_name": "packer_aws_sample-{{timestamp}}"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "rm -f /root/.ssh/authorized_keys"
+      ]
+    }
+  ]
+}
